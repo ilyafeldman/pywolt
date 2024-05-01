@@ -23,7 +23,7 @@ Upcoming Features:
 2. Clone the project:
 
    ```bash
-   git clone https://github.com/your_username/pywolt.git
+   git clone https://github.com/ilyafeldman/pywolt
    ```
 
 3. Navigate into the project folder:

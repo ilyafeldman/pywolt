@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "wolt-api"
+name = "pywolt"
 version = "0.1.0"
 description = ""
 authors = ["Ilya Feldman <ilyafeldm@gmail.com>"]

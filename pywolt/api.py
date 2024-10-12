@@ -1,4 +1,4 @@
-from typing import NoReturn
+from typing import NoReturn, Optional
 from .data_structures import VenueData, MenuItem, ItemSearchResult, City
 import httpx
 
@@ -8,8 +8,8 @@ class Wolt:
         self,
         lat: str,
         lon: str,
-        access_token: str | None = None,
-        refresh_token: str | None = None,
+        access_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
     ) -> None:
         self.consumer_endpoint = "https://consumer-api.wolt.com/v1/"
         self.restaurant_endpoint = "https://restaurant-api.wolt.com/"

@@ -1,10 +1,10 @@
 [project]
 name = "pywolt"
 version = "0.1.0"
-authors = ["Ilya Feldman <ilyafeldm@gmail.com>"]
+authors = [{name = "Ilya Feldman", email = "ilyafeldm@gmail.com>"}]
 description = "PyWolt is a Python library that provides an open API for interacting with the popular food delivery application Wolt."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.8"
 dependencies = [
     "httpx[http2]>=0.25.0",
     "pycountry>=24.6.1",

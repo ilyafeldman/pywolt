@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pydantic_extra_types.color import Color
 from pydantic_extra_types.currency_code import ISO4217
 from pydantic_extra_types.country import CountryAlpha3, CountryAlpha2
@@ -62,9 +62,9 @@ class OverlayV2(BaseModel):
     Represents an overlay for a venue.
     """
 
-    icon: Optional[str] | None = None
+    icon: Optional[str] = None
     primary_text: str
-    secondary_text: Optional[str] | None = None
+    secondary_text: Optional[str] = None
     telemetry_status: str
     variant: str
 
@@ -82,13 +82,13 @@ class Venue(BaseModel):
     country: CountryAlpha3
     currency: ISO4217
     delivers: bool
-    delivery_price: Optional[str | dict] | None = None
+    delivery_price: Optional[Union[str, dict]] = None
     delivery_price_highlight: bool
-    delivery_price_int: Optional[int] | None = None
+    delivery_price_int: Optional[int] = None
     estimate: int
     estimate_range: str
     franchise: str
-    icon: Optional[str] | None = None
+    icon: Optional[str] = None
     id: str
     location: Coordinates
     name: str
@@ -96,8 +96,8 @@ class Venue(BaseModel):
     price_range: int
     product_line: str
     promotions: List[Dict[str, str]]
-    rating: Optional[VenueRating] | None = None
-    short_description: Optional[str] | None = None
+    rating: Optional[VenueRating] = None
+    short_description: Optional[str] = None
     show_wolt_plus: bool
     slug: str
     tags: List[str]
@@ -117,8 +117,8 @@ class VenueData(BaseModel):
     title: str
     track_id: str
     venue: Venue
-    overlay: Optional[str] | None = None
-    overlay_v2: Optional[OverlayV2] | None = None
+    overlay: Optional[str] = None
+    overlay_v2: Optional[OverlayV2] = None
 
     def __repr__(self):
         open_status = "Open" if self.venue.online else "Closed"
@@ -250,7 +250,7 @@ class ItemSearchResult(BaseModel):
     price: int
     price_type: str
     show_wolt_plus: bool
-    tags: List[str | dict]
+    tags: List[Union[str, dict]]
     venue_id: str
     venue_name: str
     venue_rating: VenueRating

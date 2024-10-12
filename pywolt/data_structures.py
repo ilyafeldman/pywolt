@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Dict, Any
 from pydantic_extra_types.color import Color
 from pydantic_extra_types.currency_code import ISO4217
 from pydantic_extra_types.country import CountryAlpha3, CountryAlpha2

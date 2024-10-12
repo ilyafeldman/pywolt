@@ -12,7 +12,7 @@ PyWolt is a Python library that provides an open API for interacting with the po
 Upcoming Features:
 - **Authentication**: Authenticate to get access to the user's basket and make orders.
 
-## Usage Exmaple
+## Usage Examples
 
 ### Get Venues
 ```python

@@ -30,4 +30,4 @@ jobs:
     - name: Run Tests
       run: |
         uv sync --dev
-        .venv/bin/python -m pytest -n 2
+        .venv/bin/python -m pytest -n 4

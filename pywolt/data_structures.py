@@ -1,4 +1,5 @@
 from typing import List, Optional, Tuple, Dict, Any
+from pydantic_extra_types.color import Color
 from pydantic_extra_types.currency_code import ISO4217
 from pydantic_extra_types.country import CountryAlpha3
 from pydantic import BaseModel, HttpUrl
@@ -37,7 +38,7 @@ class Image(BaseModel):
     """
 
     blurhash: Optional[str]
-    url: HttpUrl
+    url: str
 
 
 class Link(BaseModel):
@@ -145,6 +146,7 @@ class VenueData(BaseModel):
         ]
 
         return (
+            f"Name: {self.venue.name}\n"
             f"Address: {self.venue.address}\n"
             f"Price Range: {price_range_desc}\n"
             f"Status: {open_status}\n"
@@ -166,12 +168,6 @@ class MenuItemOption(BaseModel):
     parent: str
     required_option_selections: list
 
-    def __repr__(self):
-        return (
-            f"Name: {self.name}\n"
-            f"Price: {self.baseprice/100}₪\n"
-            f"Availability: {'Available' if self.enabled else 'Not available'}\n"
-        )
 
 
 class MenuItem(BaseModel):
@@ -186,7 +182,7 @@ class MenuItem(BaseModel):
     barcode_gtin: Optional[str]
     baseprice: int
     brand_id: Optional[str]
-    caffeine_content: Optional[str]
+    caffeine_content: Optional[dict]
     category: str
     checksum: str
     deposit: Optional[float]
@@ -231,3 +227,29 @@ class MenuItem(BaseModel):
             f"Price: {self.baseprice/100}₪\n"
             f"Availability: {'Available' if self.enabled else 'Not available'}\n"
         )
+
+
+class Tag(BaseModel):
+    background_color: Color
+    name: str
+    text_color: Color
+    variant: str
+
+
+class ItemSearchResult(BaseModel):
+    country: CountryAlpha3
+    currency: ISO4217
+    delivery_price: Optional[int] = None
+    delivery_price_highlight: bool
+    estimate_range: str
+    id: str
+    image: Optional[Image] = None
+    is_available: bool
+    name: str
+    price: int
+    price_type: str
+    show_wolt_plus: bool
+    tags: List[str]
+    venue_id: str
+    venue_name: str
+    venue_rating: VenueRating

@@ -1,6 +1,6 @@
 # PyWolt
 
-PyWolt is a Python library that provides an open API for interacting with the popular food delivery application Wolt. It utilizes the native, internal Wolt web API and wraps it in a Pythonic interface, allowing developers to easily integrate Wolt's functionality into their Python projects.
+PyWolt is a Python library that provides an open API for interacting with the popular food delivery application Wolt. It utilizes the native, internal Wolt web API and wraps it in a Pythonic interface.
 
 ## Features
 
@@ -8,58 +8,50 @@ PyWolt is a Python library that provides an open API for interacting with the po
 - **Search Venues**: Search for venues based on coordinates and a text query.
 - **Search Food Items**: Search for food items based on coordinates and a text query.
 - **List Venue Menu**: Retrieve the menu of a specific venue.
-
+- **List Cities**: Retrieve a list of cities and their coordinates using Wolt's buit-in api
 Upcoming Features:
 - **Authentication**: Authenticate to get access to the user's basket and make orders.
 
-## How to Use PyWolt
+## Usage Exmaple
 
-1. Install Poetry:
-
-   ```bash
-   curl -sSL https://install.python-poetry.org | python -
-   ```
-
-2. Clone the project:
-
-   ```bash
-   git clone https://github.com/ilyafeldman/pywolt
-   ```
-
-3. Navigate into the project folder:
-
-   ```bash
-   cd pywolt
-   ```
-
-4. Install dependencies:
-
-   ```bash
-   poetry install
-   ```
-
-5. You are now ready to use PyWolt in your Python projects!
-
-## Code Example
-
+### Get Venues
 ```python
 from pywolt.api import Wolt
+import asyncio
 
 # Initialize Wolt instance with latitude and longitude
-wolt = Wolt(lat="XX.XXXXXX", lon="XX.XXXXXX")
+wolt = Wolt(lat="35.0844", lon="106.6504")
 
 # Get venues available at specified coordinates
-venues = wolt.get_venues()
+venues = asyncio.run(wolt.get_venues())
 
 # Get details of a specific venue (e.g., Los Pollos Hermanos)
-los_pollos = venues["Los Pollos Hermanos"]
+los_pollos = venues[0]
 
-# Get the menu of the venue
-los_pollos_menu = wolt.get_menu(los_pollos.venue.slug)
-
-# Get details of a specific item from the menu (e.g., Chicken Fillet Burger)
-burger = los_pollos_menu["Chicken Fillet Burger"]
+print(los_pollos.venue.name)
 ```
+```python
+Los Pollos Hermanos
+```
+
+### Get the menu of the venue
+```python
+los_pollos_menu = asyncio.run(wolt.get_menu(los_pollos.venue.slug))
+```
+
+### Search Venues
+```python
+los_pollos_menu = asyncio.run(wolt.search_venues("pizza"))
+```
+### Search Items
+```python
+los_pollos_menu = asyncio.run(wolt.search_items("pizza"))
+```
+### Get Cities
+```python
+los_pollos_menu = asyncio.run(wolt.get_cities())
+```
+
 
 ## License
 

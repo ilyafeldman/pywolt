@@ -1,8 +1,10 @@
 from typing import List, Optional, Tuple, Dict, Any
 from pydantic_extra_types.color import Color
 from pydantic_extra_types.currency_code import ISO4217
-from pydantic_extra_types.country import CountryAlpha3
-from pydantic import BaseModel, HttpUrl
+from pydantic_extra_types.country import CountryAlpha3, CountryAlpha2
+from pydantic import BaseModel, Field
+from pydantic_geojson import PointModel
+from pydantic_geojson._base import Coordinates
 
 
 class SortingSortables(BaseModel):
@@ -88,7 +90,7 @@ class Venue(BaseModel):
     franchise: str
     icon: Optional[str] | None = None
     id: str
-    location: Tuple[float, float]
+    location: Coordinates
     name: str
     online: bool
     price_range: int
@@ -167,7 +169,6 @@ class MenuItemOption(BaseModel):
     minimum_total_selections: int
     parent: str
     required_option_selections: list
-
 
 
 class MenuItem(BaseModel):
@@ -249,7 +250,29 @@ class ItemSearchResult(BaseModel):
     price: int
     price_type: str
     show_wolt_plus: bool
-    tags: List[str]
+    tags: List[str | dict]
     venue_id: str
     venue_name: str
     venue_rating: VenueRating
+
+
+class City(BaseModel):
+    country_code_alpha2: CountryAlpha2 = Field(
+        ..., description="Alpha-2 code of the country"
+    )
+    country_code_alpha3: CountryAlpha3 = Field(
+        ..., description="Alpha-3 code of the country"
+    )
+    has_frontpage: bool = Field(
+        ..., description="Indicates if the city has a front page"
+    )
+    id: str = Field(..., description="Unique identifier for the city")
+    location: PointModel = Field(
+        ..., description="Location data including coordinates and type"
+    )
+    name: str = Field(..., description="Name of the city")
+    slug: str = Field(..., description="URL-friendly string for the city name")
+    subareas: List[str] = Field(
+        default_factory=list, description="List of subareas within the city"
+    )
+    timezone: str = Field(..., description="Timezone of the city")

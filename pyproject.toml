@@ -1,19 +1,24 @@
-[tool.poetry]
+[project]
 name = "pywolt"
 version = "0.1.0"
-description = ""
 authors = ["Ilya Feldman <ilyafeldm@gmail.com>"]
+description = "PyWolt is a Python library that provides an open API for interacting with the popular food delivery application Wolt."
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx[http2]>=0.25.0",
+    "pycountry>=24.6.1",
+    "pydantic>=2.9.2",
+    "pydantic-extra-types>=2.9.0",
+    "pydantic-geojson>=0.1.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-httpx = "^0.27.0"
-ipykernel = "^6.29.4"
-pydantic = "^2.7.1"
-pydantic-extra-types = "^2.7.0"
-pycountry = "^23.12.11"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "pytest-xdist>=3.6.1",
+    "pytest-asyncio>=0.24.0",
+    "pytest-httpx>=0.32.0",
+    "ipykernel>=6.29.5",
+    "pandas>=2.2.3",
+]

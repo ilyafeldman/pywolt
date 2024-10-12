@@ -1,5 +1,5 @@
-from typing import Dict, NoReturn
-from .data_structures import VenueData, MenuItem, ItemSearchResult
+from typing import NoReturn
+from .data_structures import VenueData, MenuItem, ItemSearchResult, City
 import httpx
 
 
@@ -24,23 +24,32 @@ class Wolt:
 
         else:
             self.access_token = access_token
-        self.sesh = httpx.AsyncClient()
+        self.sesh = httpx.AsyncClient(http2=True)
 
     async def get_venues(self) -> list[VenueData]:
         response = await self.sesh.get(
             f"{self.consumer_endpoint}pages/restaurants",
             params={"lat": self.lat, "lon": self.lon},
         )
-        data = response.json()["sections"][1]["items"]
-        return [VenueData(**item) for item in data]
+        sections = response.json()["sections"]
+        try:
+            return [VenueData(**item) for item in sections[1]["items"]]
+        except IndexError:
+            raise ValueError(sections[0]["title"])
 
-    async def get_menu(self, venue_slug: str) -> list[MenuItem]:
+    async def get_menu(
+        self,
+        venue_slug: str,
+        unit_prices: bool = True,
+        show_weighted_items: bool = True,
+        show_subcategories: bool = True,
+    ) -> list[MenuItem]:
         response = await self.sesh.get(
             f"{self.restaurant_endpoint}v4/venues/slug/{venue_slug}/menu/data",
             params={
-                "unit_prices": "true",
-                "show_weighted_items": "true",
-                "show_subcategories": "true",
+                "unit_prices": unit_prices,
+                "show_weighted_items": show_weighted_items,
+                "show_subcategories": show_subcategories,
             },
         )
         data = response.json()["items"]
@@ -56,8 +65,11 @@ class Wolt:
                 "lon": self.lon,
             },
         )
-        data = response.json()["sections"][0]["items"]
-        return [VenueData(**item) for item in data]
+        data = response.json()["sections"][0]
+        if "items" in data:
+            return [VenueData(**item) for item in data["items"]]
+        else:
+            raise ValueError(data["title"])
 
     async def search_items(self, query: str) -> list[ItemSearchResult]:
         response = await self.sesh.post(
@@ -70,8 +82,21 @@ class Wolt:
             },
         )
         response.raise_for_status()
-        data = response.json()["sections"][0]["items"]
-        return [ItemSearchResult(**item["menu_item"]) for item in data]
+        data = response.json()["sections"][0]
+        if "items" in data:
+            return [ItemSearchResult(**item["menu_item"]) for item in data["items"]]
+        else:
+            raise ValueError(data["title"])
+
+    async def get_cities(
+        self,
+    ) -> list[ItemSearchResult]:
+        response = await self.sesh.get(
+            self.restaurant_endpoint + "v1/cities",
+        )
+        response.raise_for_status()
+        data = response.json()["results"]
+        return [City(**item) for item in data]
 
     def refresh_auth_details(self, refresh_token: str) -> NoReturn:
         resp = httpx.post(

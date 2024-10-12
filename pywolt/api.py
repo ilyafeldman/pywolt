@@ -1,10 +1,9 @@
-from typing import Dict
-from .data_structures import VenueData, MenuItem
-import httpx as req
+from typing import Dict, NoReturn
+from .data_structures import VenueData, MenuItem, ItemSearchResult
+import httpx
 
 
 class Wolt:
-
     def __init__(
         self,
         lat: str,
@@ -21,91 +20,94 @@ class Wolt:
         self.lat = lat
         self.lon = lon
         if refresh_token:
-            auth_details = self.get_auth_details(refresh_token)
-            self.refresh_token = auth_details["refresh_token"]
-            self.access_token = auth_details["access_token"]
+            self.refresh_auth_details(refresh_token)
 
         else:
             self.access_token = access_token
+        self.sesh = httpx.AsyncClient()
 
-    def get_venues(self) -> dict[str, VenueData]:
-        return {
-            item.get("title"): VenueData(**item)
-            for item in req.get(
-                self.consumer_endpoint + "pages/restaurants",
-                params={"lat": self.lat, "lon": self.lon},
-            ).json()["sections"][1]["items"]
-        }
+    async def get_venues(self) -> list[VenueData]:
+        response = await self.sesh.get(
+            f"{self.consumer_endpoint}pages/restaurants",
+            params={"lat": self.lat, "lon": self.lon},
+        )
+        data = response.json()["sections"][1]["items"]
+        return [VenueData(**item) for item in data]
 
-    def get_menu(self, venue_slug: str) -> Dict[str, MenuItem]:
-        return {
-            item.get("name"): MenuItem(**item)
-            for item in req.get(
-                self.restaurant_endpoint
-                + "v4/venues/slug/"
-                + venue_slug
-                + "/menu/data",
-                params={
-                    "unit_prices": "true",
-                    "show_weighted_items": "true",
-                    "show_subcategories": "true",
-                },
-            ).json()["items"]
-        }
+    async def get_menu(self, venue_slug: str) -> list[MenuItem]:
+        response = await self.sesh.get(
+            f"{self.restaurant_endpoint}v4/venues/slug/{venue_slug}/menu/data",
+            params={
+                "unit_prices": "true",
+                "show_weighted_items": "true",
+                "show_subcategories": "true",
+            },
+        )
+        data = response.json()["items"]
+        return [MenuItem(**item) for item in data]
 
-    def search_venues(self, query: str) -> Dict[str, VenueData]:
-        return {
-            item.get("title"): VenueData(**item)
-            for item in req.post(
-                self.restaurant_endpoint + "v1/pages/search",
-                json={
-                    "q": query,
-                    "target": "venues",
-                    "lat": self.lat,
-                    "lon": self.lon,
-                },
-            ).json()["sections"][0]["items"]
-        }
+    async def search_venues(self, query: str) -> list[VenueData]:
+        response = await self.sesh.post(
+            self.restaurant_endpoint + "v1/pages/search",
+            json={
+                "q": query,
+                "target": "venues",
+                "lat": self.lat,
+                "lon": self.lon,
+            },
+        )
+        data = response.json()["sections"][0]["items"]
+        return [VenueData(**item) for item in data]
 
-    def search_items(self, query: str) -> Dict[str, VenueData]:
-        return {
-            item.get("title"): VenueData(**item)
-            for item in req.post(
-                self.restaurant_endpoint + "v1/pages/search",
-                json={
-                    "q": query,
-                    "target": "venues",
-                    "lat": self.lat,
-                    "lon": self.lon,
-                },
-            ).json()["sections"][0]["items"]
-        }
+    async def search_items(self, query: str) -> list[ItemSearchResult]:
+        response = await self.sesh.post(
+            self.restaurant_endpoint + "v1/pages/search",
+            json={
+                "q": query,
+                "target": "items",
+                "lat": self.lat,
+                "lon": self.lon,
+            },
+        )
+        response.raise_for_status()
+        data = response.json()["sections"][0]["items"]
+        return [ItemSearchResult(**item["menu_item"]) for item in data]
 
-    def get_auth_details(self, refresh_token: str) -> Dict[str, str]:
-        resp = req.post(
+    def refresh_auth_details(self, refresh_token: str) -> NoReturn:
+        resp = httpx.post(
             self.auth_endpoint,
             data={
                 "refresh_token": refresh_token,
                 "grant_type": "refresh_token",
             },
-        ).json()
-        return resp
-
-    def add_to_basket(self, item: MenuItem, amount: int = 1):
-        basket_item = {
-            "items": [
-                {
-                    "id": item.id,
-                    "count": amount,
-                    "name": item.name,
-                    "price": item.baseprice,
-                    "options": [],
-                    "substitution_settings": {"is_allowed": "true"},
-                }
-            ],
-            "venue_id": "5c51940046700c000a146181",
-            "currency": "ILS",
-        }
-        req.post(
-            self.basket_endpoint, auth="Bearer " + self.access_token, data=basket_item
         )
+        data = resp.json()
+        self.access_token = data["access_token"]
+        self.refresh_token = data["refresh_token"]
+
+    # def add_to_basket(self, item: MenuItem, amount: int = 1) -> NoReturn:
+    #     basket_item = {
+    #         "items": [
+    #             {
+    #                 "id": item.id,
+    #                 "count": amount,
+    #                 "name": item.name,
+    #                 "price": item.baseprice,
+    #                 "options": [],
+    #                 "substitution_settings": {"is_allowed": "true"},
+    #             }
+    #         ],
+    #         # "venue_id": "5c51940046700c000a146181",
+    #         # "currency": "ILS",
+    #     }
+    #     if self.access_token:
+
+    #         resp = req.post(
+    #             self.basket_endpoint,
+    #             auth="Bearer " + self.access_token,
+    #             data=basket_item,
+    #         )
+    #         if resp.status_code == 401:
+    #             self.refresh_auth_details(self.refresh_token)
+    #         else:
+    #             pass

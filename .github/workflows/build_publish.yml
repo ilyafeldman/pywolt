@@ -14,7 +14,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   build:
@@ -43,10 +42,13 @@ jobs:
   publish:
     needs:
     - build
+    name: Publish release to PyPI
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/p/pywolt  # Replace <package-name> with your PyPI project name
+      url: https://pypi.org/p/pywolt
 
     steps:
     - name: Download all the dists
